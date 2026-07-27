@@ -1,0 +1,17 @@
+# Dataset caches built on first run (Cell 8): large and machine-specific
+.cache_ucf101_11class/
+.cache_ucf101_full/
+.cache_ucf101_11class_T*/
+
+# Result directories written by Cells 10 / 9B
+ablation_results_11class/
+ablation_results_ucf101_full/
+
+# Checkpoints
+*.pth
+*.pt
+
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store

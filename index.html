@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Replication record for the SAM-CapsNet manuscript: architecture, ablation grid, training protocol and the cell-to-figure map for the accompanying notebook.">
+<title>SAM-CapsNet &middot; Replication Record</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
+  body, h1, h2, h3, p, figure, blockquote, dl, dd { margin: 0; }
+  img, picture { max-width: 100%; display: block; }
+  input, button, textarea, select { font: inherit; }
+
+  :root {
+    --ground: #f6f7f9;
+    --panel: #ffffff;
+    --panel-2: #f0f2f5;
+    --ink: #171b21;
+    --muted: #5c6673;
+    --rule: #dde2e8;
+    --rule-strong: #c3cad3;
+    --accent: #16706b;
+    --accent-soft: #e2efee;
+    --ok: #2f7d4f;
+    --warn: #8a5f16;
+    --crit: #a4442c;
+
+    --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+    --measure: 74ch;
+    --pad: clamp(1.1rem, 4vw, 2.6rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #12151a;
+      --panel: #191d24;
+      --panel-2: #1f242c;
+      --ink: #e6e9ee;
+      --muted: #949daa;
+      --rule: #2a313a;
+      --rule-strong: #3a434f;
+      --accent: #4fb8ae;
+      --accent-soft: #17302e;
+      --ok: #5fbd85;
+      --warn: #d3a24a;
+      --crit: #e08268;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #12151a;
+    --panel: #191d24;
+    --panel-2: #1f242c;
+    --ink: #e6e9ee;
+    --muted: #949daa;
+    --rule: #2a313a;
+    --rule-strong: #3a434f;
+    --accent: #4fb8ae;
+    --accent-soft: #17302e;
+    --ok: #5fbd85;
+    --warn: #d3a24a;
+    --crit: #e08268;
+  }
+  :root[data-theme="light"] {
+    --ground: #f6f7f9;
+    --panel: #ffffff;
+    --panel-2: #f0f2f5;
+    --ink: #171b21;
+    --muted: #5c6673;
+    --rule: #dde2e8;
+    --rule-strong: #c3cad3;
+    --accent: #16706b;
+    --accent-soft: #e2efee;
+    --ok: #2f7d4f;
+    --warn: #8a5f16;
+    --crit: #a4442c;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 var(--pad) 5rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 62rem; margin: 0 auto; }
+  .measure { max-width: var(--measure); }
+
+  header.masthead {
+    padding: 3.4rem 0 1.7rem;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4.6vw, 2.9rem);
+    line-height: 1.14;
+    letter-spacing: -0.012em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-family: var(--serif);
+    font-size: 1.09rem;
+    color: var(--muted);
+    max-width: var(--measure);
+    margin: 0;
+  }
+
+  section { padding-top: 3.1rem; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.42rem;
+    letter-spacing: -0.008em;
+    margin: 0 0 0.5rem;
+    text-wrap: balance;
+  }
+  p { margin: 0 0 0.9rem; }
+  .lede { color: var(--muted); margin-bottom: 1.4rem; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+  }
+  .backs {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 0.12rem 0.42rem;
+    white-space: nowrap;
+  }
+
+  .scroller {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--panel);
+    margin: 1.1rem 0 0.7rem;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+  caption {
+    caption-side: top;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.7rem 0.9rem 0.45rem;
+  }
+  th, td {
+    padding: 0.5rem 0.9rem;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+  tr.total td { font-weight: 650; background: var(--panel-2); }
+  td.name { font-family: var(--mono); font-size: 0.82rem; }
+  .delta { color: var(--accent); font-weight: 650; }
+  .dim { color: var(--muted); }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.08rem 0.4rem;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .chip.ckpt { color: var(--ok); }
+  .chip.log { color: var(--warn); }
+  .chip.one { color: var(--crit); }
+
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 0.85rem 1.1rem;
+    margin: 1.2rem 0;
+    font-size: 0.93rem;
+    max-width: var(--measure);
+  }
+  .note strong { font-weight: 650; }
+  .note p:last-child { margin-bottom: 0; }
+
+  .keygrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.9rem;
+    margin: 1.2rem 0;
+  }
+  .keycard {
+    border: 1px solid var(--rule);
+    background: var(--panel);
+    padding: 0.85rem 1rem;
+    font-size: 0.88rem;
+  }
+  .keycard p { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.85rem; }
+
+  .src { font-size: 0.86rem; color: var(--muted); max-width: var(--measure); }
+
+  code { font-family: var(--mono); font-size: 0.86em; background: var(--panel-2); padding: 0.08em 0.32em; border-radius: 2px; }
+  ul { margin: 0 0 0.9rem; padding-left: 1.15rem; }
+  li { margin-bottom: 0.34rem; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.85rem;
+    max-width: var(--measure);
+  }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .themebar { display: flex; justify-content: flex-end; padding-top: 1.1rem; }
+  .themebtn {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 2px; padding: 0.3rem 0.6rem; cursor: pointer;
+  }
+  .themebtn:hover { color: var(--accent); border-color: var(--accent); }
+  .themebtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media print { .themebar { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="themebar"><button class="themebtn" id="themebtn" type="button">Dark theme</button></div>
+
+<header class="masthead">
+  <div class="eyebrow">Replication record &middot; manuscript under review</div>
+  <h1>SAM-CapsNet: the notebook behind every table and figure</h1>
+  <p class="standfirst">
+    Capsule Network with Multi-Scale Attention for Video-Based Human Activity Recognition.
+    One self-contained notebook defines the model, the eight-configuration ablation grid, the
+    non-capsule baselines and the capsule-space analyses. This page is the map to it.
+  </p>
+</header>
+
+<section>
+  <h2>How to read this</h2>
+  <p class="lede measure">
+    The manuscript is under review, so no accuracy values appear on this page or in the
+    repository. The notebook is published with its outputs cleared. What is documented here is
+    everything needed to regenerate those values independently: the architecture as implemented,
+    the two run configurations, the ablation grid, the fixed training protocol, and which cell
+    produces which table or figure.
+  </p>
+
+  <div class="keygrid">
+    <div class="keycard">
+      <span class="chip ckpt">published</span>
+      <p>The notebook itself, the architecture, the ablation registry and the analysis code.</p>
+    </div>
+    <div class="keycard">
+      <span class="chip log">regenerate locally</span>
+      <p>All accuracies, per-class tables and figures. Run the notebook against your own UCF-101.</p>
+    </div>
+    <div class="keycard">
+      <span class="chip one">withheld until acceptance</span>
+      <p>Run logs, checkpoints and the reported numbers.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><strong>Availability.</strong> This record is unlisted rather than secret. It stays
+    reachable by direct URL for reviewers and editors, while <code>robots.txt</code> and a
+    <code>noindex</code> directive keep it out of search results. Both are removed on
+    acceptance.</p>
+  </div>
+
+  <p class="measure">
+    Repository: <a href="https://github.com/ycwonglab/SAM_CapsNet">github.com/ycwonglab/SAM_CapsNet</a>.
+    Notebook:
+    <a href="https://github.com/ycwonglab/SAM_CapsNet/blob/main/Capsule_Network_with_Multi_Scale_Attention_(SAM_CapsNet)_for_Video_Based_Human_Activity_Recognition.ipynb">open on GitHub</a>.
+  </p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>Architecture as implemented</h2>
+    <span class="backs">backs Sec. II-A to II-D</span>
+  </div>
+  <p class="lede measure">
+    A shared four-layer convolutional stem encodes every frame independently to a 256-channel
+    feature map. Each frame is refined by the Multi-Scale SAM block, then the refined frames are
+    mean-pooled over time before the capsule stage. Temporal information therefore enters through
+    per-frame modulation, not through a sequence model after pooling.
+  </p>
+
+  <div class="scroller">
+    <table>
+      <caption>Multi-Scale SAM block, applied per frame in this fixed order</caption>
+      <thead>
+        <tr><th class="num">Step</th><th>Stage</th><th>Mechanism</th><th>Applied as</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td><td class="name">Channel</td>
+          <td>CBAM-style squeeze-excitation. Average and max pooling share one bottleneck MLP at reduction ratio 8, summed, sigmoid.</td>
+          <td>multiplicative</td>
+        </tr>
+        <tr>
+          <td class="num">2</td><td class="name">Temporal motion map</td>
+          <td>Frame <code>t</code> concatenated with frame <code>t-1</code>, two parallel convolutions at 3&times;3 and 5&times;5, fused by 1&times;1 and sigmoid.</td>
+          <td class="dim">map only</td>
+        </tr>
+        <tr>
+          <td class="num">3</td><td class="name">Spatial</td>
+          <td>Point prompt added to the channel-refined features, concatenated with the motion map, then 1&times;1 / 3&times;3 / 1&times;1 ending in a sigmoid.</td>
+          <td>multiplicative</td>
+        </tr>
+        <tr>
+          <td class="num">4</td><td class="name">Temporal residual</td>
+          <td><code>out + tanh(alpha) &middot; (out &middot; a_m)</code>. The gate is signed, so motion regions can be amplified rather than only suppressed.</td>
+          <td>additive residual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="src">
+    Frame 0 has no predecessor, so it receives no motion map and skips steps 2 and 4. The point
+    prompt is a learned per-channel bias initialised at sigma = 0.1, and it is applied only when
+    the spatial branch is active.
+  </p>
+
+  <p class="measure">
+    The capsule stage is the standard two-layer arrangement. <code>PrimaryCaps</code> is a
+    3&times;3 convolution reshaped into 8-dimensional capsules and squashed.
+    <code>ActivityCaps</code> runs three dynamic-routing iterations to one 16-dimensional capsule
+    per class. The class decision is the L2 norm of the output capsules, trained with
+    cross-entropy over those norms rather than the original margin loss.
+  </p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>Two run configurations</h2>
+    <span class="backs">Cells 7A and 7B</span>
+  </div>
+  <p class="lede measure">
+    The routing tensor <code>W</code> is shaped <code>(in_caps, num_classes, 16, 8)</code>, so its
+    size scales with the product of the input-capsule count and the class count. Going from 11
+    classes to 101 forces the input resolution down to keep the run inside 8&nbsp;GB of GPU
+    memory. The two rows below are not interchangeable, and results from one are not directly
+    comparable to the other.
+  </p>
+
+  <div class="scroller">
+    <table>
+      <caption>Configuration differences</caption>
+      <thead>
+        <tr><th></th><th class="num">11-class</th><th class="num">101-class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="name">Notebook cell</td><td class="num">7A</td><td class="num">7B</td></tr>
+        <tr><td class="name">Backs</td><td class="num">Tables 1, 2</td><td class="num">Table 3 row</td></tr>
+        <tr><td class="name">Classes</td><td class="num">11</td><td class="num">101</td></tr>
+        <tr><td class="name">Input resolution</td><td class="num">224 &times; 224</td><td class="num">112 &times; 112</td></tr>
+        <tr><td class="name">Feature map</td><td class="num">14 &times; 14</td><td class="num">7 &times; 7</td></tr>
+        <tr><td class="name">Primary capsules per cell</td><td class="num">32</td><td class="num">16</td></tr>
+        <tr class="total"><td>Input capsules to routing</td><td class="num">6,272</td><td class="num">784</td></tr>
+        <tr><td class="name">Clips</td><td class="num">938</td><td class="num">~13,320</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="src">
+    The 11-class subset is built from UCF-101 folders rather than the separate UCF-11
+    distribution, so one download covers both experiments: Basketball, Biking, Diving, GolfSwing,
+    HorseRiding, SoccerJuggling, Swing, TennisSwing, TrampolineJumping, VolleyballSpiking and
+    WalkingWithDog (the paper's &ldquo;Walking&rdquo;).
+  </p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>Ablation grid</h2>
+    <span class="backs">Cell 5, run by Cell 10</span>
+  </div>
+  <p class="lede measure">
+    Eight capsule configurations at five seeds each. The grid is not a clean factorial: the
+    proposed configuration is the only one carrying the point prompt and the learnable fusion
+    parameter, so the step from a two-branch configuration to the proposed model moves more than
+    one component at a time.
+  </p>
+
+  <div class="scroller">
+    <table>
+      <caption>Registered configurations, in the order the notebook runs them</caption>
+      <thead>
+        <tr>
+          <th>Key</th><th>Label</th>
+          <th class="num">Ch</th><th class="num">Sp</th><th class="num">Tm</th>
+          <th class="num">Prompt</th><th class="num">Fusion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="total"><td class="name">full_sam</td><td>SAM-CapsNet (proposed)</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td></tr>
+        <tr><td class="name">no_sam</td><td>Pure CapsNet</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">ch_only</td><td>Channel only</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">tm_only</td><td>Temporal only</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">sp_only</td><td>Spatial only</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">ch_tm</td><td>Channel + Temporal</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">tm_sp</td><td>Temporal + Spatial</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">ch_sp</td><td>Channel + Spatial</td><td class="num">&check;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="scroller">
+    <table>
+      <caption>Non-capsule baselines, sharing the same protocol</caption>
+      <thead><tr><th>Model</th><th>Definition</th><th>Cell</th></tr></thead>
+      <tbody>
+        <tr><td class="name">BaselineCNN</td><td>Identical convolutional stem, no attention, no capsules. Temporal-mean-pooled features into a linear softmax classifier.</td><td class="num">4B</td></tr>
+        <tr><td class="name">CNNSAMNoCapsule</td><td>Stem plus the Multi-Scale SAM block, linear classifier. Isolates the capsule stage.</td><td class="num">4B</td></tr>
+        <tr><td class="name">ResNet18Baseline</td><td>Frame-wise ResNet-18 at random initialisation, matching the no-pretrained-backbone protocol, mean-pooled logits.</td><td class="num">8B</td></tr>
+        <tr><td class="name">MobileNetV2</td><td>Same frame-wise arrangement as above.</td><td class="num">8B</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>Which cell produces which result</h2>
+    <span class="backs">provenance map</span>
+  </div>
+  <p class="lede measure">
+    Every table and figure in the manuscript traces to a numbered cell. Results are written to
+    <code>SAVE_DIR</code> as JSON after each configuration, so an interrupted run resumes and
+    replots through Cell 12 without retraining.
+  </p>
+
+  <div class="scroller">
+    <table>
+      <caption>Artifact to cell map</caption>
+      <thead><tr><th>Artifact</th><th>Produced by</th><th>Assembled in</th></tr></thead>
+      <tbody>
+        <tr><td>Table 1, full comparison</td><td class="name">Cell 10, Cell 10B</td><td class="name">Cell 10C</td></tr>
+        <tr><td>Table 2, per-class accuracy</td><td class="name">Cell 10</td><td class="name">Cell 11</td></tr>
+        <tr><td>Table 3, cross-model with parameter counts</td><td class="name">Cell 8B, 9B, 10</td><td class="name">Cell 10D</td></tr>
+        <tr><td>Parameter counts</td><td class="name">Cell 8C</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Frame-count grid search over T</td><td class="name">Cell 8D</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Inference latency, forward pass only</td><td class="name">Cell 9C</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Sec. II-E capsule magnitude and activation attenuation</td><td class="name">Cell 14</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Fig. 2, coupling-coefficient clustering</td><td class="name">Cell 15</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Fig. 3, four-panel interpretability</td><td class="name">Cell 16</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Fig. 4, inter-class capsule vector distributions</td><td class="name">Cell 17</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Fig. 5, confusion-matrix comparison</td><td class="name">Cell 18</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Subject-independent leave-groups-out split</td><td class="name">Cell 10A</td><td class="dim">&mdash;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="src">
+    The interpretability cells read intermediate capsule tensors through the model's
+    <code>return_routing=True</code> forward path, which exposes the primary capsules, the
+    prediction vectors <code>u_hat</code>, the final coupling coefficients <code>c</code> and the
+    pre-squash sums <code>s</code>. Cell 13 uses <code>return_attention=True</code> for the
+    spatial attention overlays.
+  </p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>Training protocol</h2>
+    <span class="backs">Cell 6, Sec. II-F</span>
+  </div>
+  <p class="lede measure">
+    Fixed across every configuration and both datasets. No early stopping, no per-configuration
+    tuning. The checkpoint with the best validation accuracy is the one evaluated on test.
+  </p>
+
+  <div class="scroller">
+    <table>
+      <caption>Run configuration</caption>
+      <thead><tr><th>Setting</th><th class="num">Value</th></tr></thead>
+      <tbody>
+        <tr><td>Frames per clip</td><td class="num">16 @ 5 fps, fixed rate</td></tr>
+        <tr><td>Epochs</td><td class="num">15</td></tr>
+        <tr><td>Batch size</td><td class="num">2</td></tr>
+        <tr><td>Gradient accumulation</td><td class="num">4 (effective batch 8)</td></tr>
+        <tr><td>Optimiser</td><td class="num">Adam</td></tr>
+        <tr><td>Learning rate</td><td class="num">5e-4</td></tr>
+        <tr><td>Weight decay</td><td class="num">1e-4</td></tr>
+        <tr><td>Schedule</td><td class="num">step decay 0.5 every 7 epochs</td></tr>
+        <tr><td>Gradient clipping</td><td class="num">5.0</td></tr>
+        <tr><td>Precision</td><td class="num">mixed (AMP on CUDA)</td></tr>
+        <tr><td>Routing iterations</td><td class="num">3</td></tr>
+        <tr class="total"><td>Seeds</td><td class="num">42, 123, 456, 789, 2024</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="src">
+    Seeding covers Python, NumPy and Torch, and sets cuDNN to deterministic mode with
+    benchmarking disabled. Splits are stratified and regenerated per seed, so each seed varies the
+    data partition as well as the initialisation.
+  </p>
+</section>
+
+<section>
+  <h2>Reproducing the results</h2>
+  <p class="lede measure">
+    Requires a CUDA GPU with at least 8&nbsp;GB, PyTorch, and a local copy of UCF-101. The first
+    pass over the data decodes video and is slow; later passes load from the on-disk frame cache.
+  </p>
+  <ul class="measure">
+    <li>Run Cells 1 to 6B to define the dataset, model, ablation registry and training utilities.</li>
+    <li>Set <code>DATASET_PATH</code> in Cell 7A. Cell 8A is a path diagnostic that reports what it
+        can and cannot find before you commit to a long run.</li>
+    <li>Run Cell 8 to build the frame cache, then Cell 9 as a single-seed smoke test.</li>
+    <li>Run Cell 10, then Cell 10B, then Cell 10C for Table 1.</li>
+    <li>For the 101-class row, switch to Cell 7B, re-run Cell 8 with <code>CLASS_SUBSET = None</code>,
+        then run Cell 9B.</li>
+  </ul>
+  <p class="src">
+    UCF-101 is distributed by its original authors at
+    <a href="https://www.crcv.ucf.edu/data/UCF101.php">crcv.ucf.edu/data/UCF101.php</a>, and the
+    UCF-11 YouTube Action set at
+    <a href="https://www.crcv.ucf.edu/data/UCF_YouTube_Action.php">crcv.ucf.edu/data/UCF_YouTube_Action.php</a>.
+    The subject-independent splitter in Cell 10A reads group identifiers from either the filename
+    or the parent folder, so it works with either distribution layout.
+  </p>
+</section>
+
+<section>
+  <h2>Deliberately not here</h2>
+  <ul class="measure">
+    <li><strong>Accuracy values, run logs and checkpoints.</strong> Withheld while the manuscript
+        is under review. They will be added to this record on acceptance.</li>
+    <li><strong>The dataset.</strong> Redistributed by its original authors at the links above.</li>
+    <li><strong>Trained weights.</strong> Every reported number comes from a run of this notebook
+        at one of the five fixed seeds, so the notebook together with the seed list is the
+        reproducible artifact.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Prepared as a replication appendix for peer review. No accuracy values are published while
+  the manuscript is under review; everything documented on this page is a direct description of
+  the code in the accompanying notebook.</p>
+</footer>
+
+</div>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themebtn');
+    var saved = null;
+    try { saved = localStorage.getItem('sam-theme'); } catch (e) {}
+    if (saved) root.setAttribute('data-theme', saved);
+    function isDark() {
+      return root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') &&
+         window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    function label() {
+      btn.textContent = isDark() ? 'Light theme' : 'Dark theme';
+      btn.setAttribute('aria-pressed', String(isDark()));
+    }
+    btn.addEventListener('click', function () {
+      var next = isDark() ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('sam-theme', next); } catch (e) {}
+      label();
+    });
+    label();
+  })();
+</script>
+</body>
+</html>
