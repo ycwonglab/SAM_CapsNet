@@ -12,6 +12,16 @@ analysis code that produces every table and figure in the paper.
 
 [`Capsule_Network_with_Multi_Scale_Attention_(SAM_CapsNet)_for_Video_Based_Human_Activity_Recognition.ipynb`](Capsule_Network_with_Multi_Scale_Attention_(SAM_CapsNet)_for_Video_Based_Human_Activity_Recognition.ipynb)
 
+### Complete reproducibility notebook
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23254309.svg)](https://doi.org/10.5281/zenodo.23254309)
+
+[`SAM_CapsNet_Complete_Reproducibility.ipynb`](SAM_CapsNet_Complete_Reproducibility.ipynb) collects every experiment, table and figure in the paper in one notebook,
+including the UCF-101 benchmark, capsule routing concentration, orientation equivariance,
+viewpoint robustness, rotation adaptation, inference latency and the subject-independent
+split. An archived copy is on Zenodo at **[10.5281/zenodo.23254309](https://doi.org/10.5281/zenodo.23254309)**. To cite the notebook, use this
+DOI.
+
 A reader-friendly summary of the architecture, the run configurations and the cell-to-artifact
 map is at **https://ycwonglab.github.io/SAM_CapsNet/**.
 
