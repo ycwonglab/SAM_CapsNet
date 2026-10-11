@@ -74,6 +74,12 @@ The UCF-101 baselines, ResNet-18 and MobileNetV2, start from ImageNet-pretrained
 weights, mean-pool per-frame features over time and use a linear classifier. They share the
 split, frame count, resolution, epochs and seeds. Their learning rate halves every 7 epochs.
 
+The two CNN rows of Table 1 come from `BaselineCNN` (Section 4B), which reuses the convolutional
+stem but replaces the capsule stage with mean- and max-pooled temporal aggregation and an MLP
+softmax classifier, with its channel attention off (Baseline CNN) or on (CNN + SAM). Section 9B
+trains both variants at seed 42 on a 70 / 15 / 15 split, with Adam at learning rate 5e-4 and
+weight decay 1e-4.
+
 The rotation-adaptation experiment (Section 21) trains for 15 epochs (`RR_EPOCHS`).
 
 ## Ablation grid
@@ -101,8 +107,10 @@ Section numbers are the numbered headings in the notebook.
 | Section | Produces |
 |---|---|
 | 1 to 8 | Setup, dataset, model, ablation registry, configuration, dataset load |
+| 4B | `BaselineCNN` definition and its training and evaluation helpers |
 | 9 | Quick single-seed check (seed 42) |
-| 10 | Table 1, Figures 3 and 4 (8 configurations x 5 seeds) |
+| 9B | Table 1 rows 1 and 2 (Baseline CNN, CNN + SAM), and the model for Figure 7 (a) |
+| 10 | Table 1 capsule rows, Figures 3 and 4 (8 configurations x 5 seeds) |
 | 11 | Figure 7 (confusion matrices) |
 | 12 | Table 2 (per-class accuracy) |
 | 13 | Figure 2 (activity capsule magnitudes and angles) |
@@ -128,7 +136,8 @@ Requires a CUDA GPU, PyTorch with torchvision, and local copies of UCF-11 and UC
 2. Run Sections 1 to 8. Section 8 builds the frame cache in `.cache_ucf11/`. The first pass
    decodes video and is slow; later passes load from the cache.
 3. Run Section 9 as a single-seed smoke test before starting the full grid.
-4. Run Sections 10 to 16 for Tables 1 and 2 and Figures 2 to 7.
+4. Run Section 9B for the CNN baselines, then Sections 10 to 16 for Tables 1 and 2 and
+   Figures 2 to 7. Section 11 needs the output of both 9B and 10.
 5. Run Section 17 for the UCF-101 benchmark. It caches frames in `.cache_ucf101_r1/`.
 6. Run Sections 18 to 23 for the supplementary analyses. Section 20 reuses the models kept in
    memory by Section 10, and Section 22 times the Section 9 model.

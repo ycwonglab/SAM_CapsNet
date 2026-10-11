@@ -20,3 +20,6 @@ __pycache__/
 .cache_ucf11/
 .cache_ucf101_r1/
 results/
+
+# Local executed copy of the reproducibility notebook (contains results; never commit)
+*_executed.ipynb
