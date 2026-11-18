@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <meta name="googlebot" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<meta name="description" content="Replication record for the SAM-CapsNet manuscript: architecture, ablation grid, training protocol and the cell-to-figure map for the accompanying notebook.">
+<meta name="description" content="Replication record for the SAM-CapsNet manuscript: architecture, model configurations, training protocol and the section-to-figure map for the accompanying notebook.">
 <title>SAM-CapsNet &middot; Replication Record</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
@@ -267,18 +267,17 @@
 </style>
 </head>
 <body>
-<div style="margin:0;padding:12px 20px;background:#fff3cd;color:#3d3200;border-bottom:1px solid #e0c96a;font:15px/1.5 system-ui,sans-serif"><strong>Updated 18 November 2026.</strong> The current notebook is <a href="https://github.com/ycwonglab/SAM_CapsNet/blob/main/SAM_CapsNet_Reproducibility_FINAL.ipynb">SAM_CapsNet_Reproducibility_FINAL.ipynb</a>. The protocol details and the section map further down this page describe the earlier notebook, now in <code>archive/</code>; the <a href="https://github.com/ycwonglab/SAM_CapsNet#readme">README</a> describes the current one.</div>
 <div class="wrap">
 
 <div class="themebar"><button class="themebtn" id="themebtn" type="button">Dark theme</button></div>
 
 <header class="masthead">
-  <div class="eyebrow">Replication record &middot; manuscript under review</div>
+  <div class="eyebrow">Replication record &middot; manuscript under review &middot; updated 18 November 2026</div>
   <h1>SAM-CapsNet: the notebook behind every table and figure</h1>
   <p class="standfirst">
-    Capsule Network with Multi-Scale Attention for Video-Based Human Activity Recognition.
-    One self-contained notebook defines the model, the eight-configuration ablation grid, the
-    non-capsule baselines and the capsule-space analyses. This page is the map to it.
+    Attention-Conditioned Capsule Networks: A Multi-Scale Attention Module (SAM-CapsNet) for
+    Video-Based Human Activity Recognition. One notebook defines the models and training routines
+    and produces the tables and figures of the paper. This page is the map to it.
   </p>
 </header>
 
@@ -286,24 +285,24 @@
   <h2>How to read this</h2>
   <p class="lede measure">
     The manuscript is under review, so no accuracy values appear on this page or in the
-    repository. The notebook is published with its outputs cleared. What is documented here is
-    everything needed to regenerate those values independently: the architecture as implemented,
-    the two run configurations, the ablation grid, the fixed training protocol, and which cell
-    produces which table or figure.
+    repository. The notebook is published here with its outputs cleared. This page documents what
+    is needed to regenerate the values independently: the architecture as implemented, the
+    datasets and splits, the model configurations, the training protocol, and which notebook
+    section produces which table or figure.
   </p>
 
   <div class="keygrid">
     <div class="keycard">
       <span class="chip ckpt">published</span>
-      <p>The notebook itself, the architecture, the ablation registry and the analysis code.</p>
+      <p>The notebook, the model and baseline definitions, the analysis code and the split file lists for every seed.</p>
     </div>
     <div class="keycard">
       <span class="chip log">regenerate locally</span>
-      <p>All accuracies, per-class tables and figures. Run the notebook against your own UCF-101.</p>
+      <p>All accuracies, tables and figures. Run the notebook against your own copies of UCF-11 and UCF-101.</p>
     </div>
     <div class="keycard">
       <span class="chip one">withheld until acceptance</span>
-      <p>Run logs, checkpoints and the reported numbers.</p>
+      <p>Run logs, checkpoints and the reported numbers. The executed notebook is archived on Zenodo under restricted access.</p>
     </div>
   </div>
 
@@ -317,10 +316,14 @@
   <p class="measure">
     Repository: <a href="https://github.com/ycwonglab/SAM_CapsNet">github.com/ycwonglab/SAM_CapsNet</a>.
     Notebook:
-    <a href="https://github.com/ycwonglab/SAM_CapsNet/blob/main/archive/Capsule_Network_with_Multi_Scale_Attention_(SAM_CapsNet)_for_Video_Based_Human_Activity_Recognition.ipynb">open on GitHub</a>.
-    Complete reproducibility notebook:
-    <a href="https://github.com/ycwonglab/SAM_CapsNet/blob/main/SAM_CapsNet_Reproducibility_FINAL.ipynb">open on GitHub</a>,
-    archived at <a href="https://doi.org/10.5281/zenodo.23254308">doi:10.5281/zenodo.23254308</a>.
+    <a href="https://github.com/ycwonglab/SAM_CapsNet/blob/main/SAM_CapsNet_Reproducibility_FINAL.ipynb">SAM_CapsNet_Reproducibility_FINAL.ipynb</a>.
+    Split file lists:
+    <a href="https://github.com/ycwonglab/SAM_CapsNet/tree/main/splits">splits/</a>.
+    Archive: <a href="https://doi.org/10.5281/zenodo.23254308">doi:10.5281/zenodo.23254308</a>
+    (always points to the latest version).
+    Two earlier notebooks are kept in
+    <a href="https://github.com/ycwonglab/SAM_CapsNet/tree/main/archive">archive/</a> for
+    reference only; they do not match the current manuscript.
   </p>
 </section>
 
@@ -330,37 +333,37 @@
     <span class="backs">backs Sec. II-A to II-D</span>
   </div>
   <p class="lede measure">
-    A shared four-layer convolutional stem encodes every frame independently to a 256-channel
-    feature map. Each frame is refined by the Multi-Scale SAM block, then the refined frames are
-    mean-pooled over time before the capsule stage. Temporal information therefore enters through
-    per-frame modulation, not through a sequence model after pooling.
+    A shared four-layer convolutional encoder turns each 112&times;112 frame into a 256-channel
+    7&times;7 feature map. Each frame is refined by the attention module, the 16 frames are
+    averaged and layer-normalised, and a capsule stage classifies the clip. Temporal information
+    enters through per-frame modulation, not through a sequence model after pooling.
   </p>
 
   <div class="scroller">
     <table>
-      <caption>Multi-Scale SAM block, applied per frame in this fixed order</caption>
+      <caption>Attention module, applied per frame in this fixed order</caption>
       <thead>
         <tr><th class="num">Step</th><th>Stage</th><th>Mechanism</th><th>Applied as</th></tr>
       </thead>
       <tbody>
         <tr>
           <td class="num">1</td><td class="name">Channel</td>
-          <td>CBAM-style squeeze-excitation. Average and max pooling share one bottleneck MLP at reduction ratio 8, summed, sigmoid.</td>
+          <td>Average and max pooling share one bottleneck MLP at reduction ratio 8, summed, sigmoid.</td>
           <td>multiplicative</td>
         </tr>
         <tr>
-          <td class="num">2</td><td class="name">Temporal motion map</td>
+          <td class="num">2</td><td class="name">Motion map</td>
           <td>Frame <code>t</code> concatenated with frame <code>t-1</code>, two parallel convolutions at 3&times;3 and 5&times;5, fused by 1&times;1 and sigmoid.</td>
           <td class="dim">map only</td>
         </tr>
         <tr>
           <td class="num">3</td><td class="name">Spatial</td>
-          <td>Point prompt added to the channel-refined features, concatenated with the motion map, then 1&times;1 / 3&times;3 / 1&times;1 ending in a sigmoid.</td>
+          <td>A learnable 256-dimensional vector (the point prompt) is added to the input of this branch, which is combined with the motion map and reduced to a spatial map ending in a sigmoid.</td>
           <td>multiplicative</td>
         </tr>
         <tr>
-          <td class="num">4</td><td class="name">Temporal residual</td>
-          <td><code>out + tanh(alpha) &middot; (out &middot; a_m)</code>. The gate is signed, so motion regions can be amplified rather than only suppressed.</td>
+          <td class="num">4</td><td class="name">Motion residual</td>
+          <td><code>out + tanh(alpha) &middot; (out &middot; a_m)</code>, with <code>alpha</code> initialised at 0.1. The gate is signed, so motion regions can be amplified or suppressed.</td>
           <td>additive residual</td>
         </tr>
       </tbody>
@@ -368,70 +371,66 @@
   </div>
 
   <p class="src">
-    Frame 0 has no predecessor, so it receives no motion map and skips steps 2 and 4. The point
-    prompt is a learned per-channel bias initialised at sigma = 0.1, and it is applied only when
-    the spatial branch is active.
+    The first frame has no predecessor, so it receives no motion map and skips steps 2 and 4. The
+    fusion weight <code>lam</code> is used only to draw attention maps; it is not part of the
+    forward pass.
   </p>
 
   <p class="measure">
-    The capsule stage is the standard two-layer arrangement. <code>PrimaryCaps</code> is a
-    3&times;3 convolution reshaped into 8-dimensional capsules and squashed.
-    <code>ActivityCaps</code> runs three dynamic-routing iterations to one 16-dimensional capsule
-    per class. The class decision is the L2 norm of the output capsules, trained with
-    cross-entropy over those norms rather than the original margin loss.
+    The capsule stage forms 16 primary-capsule types of dimension 8 at each of the 7&times;7
+    positions (784 primary capsules) and runs three routing iterations to one 16-dimensional
+    activity capsule per class. The class score is the capsule length. The transformation
+    matrices are shaped <code>(784, classes, 16, 8)</code>, so this layer grows linearly with the
+    number of classes.
   </p>
 </section>
 
 <section>
   <div class="sec-head">
-    <h2>Two run configurations</h2>
-    <span class="backs">Cells 7A and 7B</span>
+    <h2>Datasets and splits</h2>
+    <span class="backs">Sections 7, 8 and 24, Sec. II-F</span>
   </div>
   <p class="lede measure">
-    The routing tensor <code>W</code> is shaped <code>(in_caps, num_classes, 16, 8)</code>, so its
-    size scales with the product of the input-capsule count and the class count. Going from 11
-    classes to 101 forces the input resolution down to keep the run inside 8&nbsp;GB of GPU
-    memory. The two rows below are not interchangeable, and results from one are not directly
-    comparable to the other.
+    Both datasets use the same input size, frame sampling and split procedure. Videos are listed
+    in sorted order, so each split depends only on its seed. The file lists are in
+    <code>splits/</code>, one CSV per dataset and seed with the columns <code>split</code>,
+    <code>class</code> and <code>video</code>.
   </p>
 
   <div class="scroller">
     <table>
-      <caption>Configuration differences</caption>
+      <caption>Dataset settings</caption>
       <thead>
-        <tr><th></th><th class="num">11-class</th><th class="num">101-class</th></tr>
+        <tr><th></th><th class="num">UCF-11</th><th class="num">UCF-101</th></tr>
       </thead>
       <tbody>
-        <tr><td class="name">Notebook cell</td><td class="num">7A</td><td class="num">7B</td></tr>
-        <tr><td class="name">Backs</td><td class="num">Tables 1, 2</td><td class="num">Table 3 row</td></tr>
         <tr><td class="name">Classes</td><td class="num">11</td><td class="num">101</td></tr>
-        <tr><td class="name">Input resolution</td><td class="num">224 &times; 224</td><td class="num">112 &times; 112</td></tr>
-        <tr><td class="name">Feature map</td><td class="num">14 &times; 14</td><td class="num">7 &times; 7</td></tr>
-        <tr><td class="name">Primary capsules per cell</td><td class="num">32</td><td class="num">16</td></tr>
-        <tr class="total"><td>Input capsules to routing</td><td class="num">6,272</td><td class="num">784</td></tr>
-        <tr><td class="name">Clips</td><td class="num">938</td><td class="num">~13,320</td></tr>
+        <tr><td class="name">Clips</td><td class="num">1,600</td><td class="num">13,320</td></tr>
+        <tr><td class="name">Input</td><td class="num">112 &times; 112</td><td class="num">112 &times; 112</td></tr>
+        <tr><td class="name">Frames per clip</td><td class="num">16 at a fixed 5 fps</td><td class="num">16 at a fixed 5 fps</td></tr>
+        <tr><td class="name">Split</td><td class="num">stratified 70 / 15 / 15</td><td class="num">stratified 70 / 15 / 15</td></tr>
+        <tr class="total"><td>Train / validation / test clips</td><td class="num">1,119 / 240 / 241</td><td class="num">9,323 / 1,998 / 1,999</td></tr>
+        <tr><td class="name">Batch size &times; accumulation</td><td class="num">4 &times; 4</td><td class="num">2 &times; 4</td></tr>
       </tbody>
     </table>
   </div>
 
   <p class="src">
-    The 11-class subset is built from UCF-101 folders rather than the separate UCF-11
-    distribution, so one download covers both experiments: Basketball, Biking, Diving, GolfSwing,
-    HorseRiding, SoccerJuggling, Swing, TennisSwing, TrampolineJumping, VolleyballSpiking and
-    WalkingWithDog (the paper's &ldquo;Walking&rdquo;).
+    The split is drawn at clip level. It does not keep the 25 groups of UCF-11 apart, so clips
+    from the same group can fall in both the training and test sets.
   </p>
 </section>
 
 <section>
   <div class="sec-head">
-    <h2>Ablation grid</h2>
-    <span class="backs">Cell 5, run by Cell 10</span>
+    <h2>Model configurations</h2>
+    <span class="backs">Sections 5, 19 and 20</span>
   </div>
   <p class="lede measure">
-    Eight capsule configurations at five seeds each. The grid is not a clean factorial: the
-    proposed configuration is the only one carrying the point prompt and the learnable fusion
-    parameter, so the step from a two-branch configuration to the proposed model moves more than
-    one component at a time.
+    Eight capsule configurations at five seeds each, plus an architecture-matched network with the
+    attention module switched off. The proposed configuration is the only one carrying the point
+    prompt, so the step from a two-branch configuration to the proposed model moves more than one
+    component at a time.
   </p>
 
   <div class="scroller">
@@ -441,31 +440,32 @@
         <tr>
           <th>Key</th><th>Label</th>
           <th class="num">Ch</th><th class="num">Sp</th><th class="num">Tm</th>
-          <th class="num">Prompt</th><th class="num">Fusion</th>
+          <th class="num">Prompt</th>
         </tr>
       </thead>
       <tbody>
-        <tr class="total"><td class="name">full_sam</td><td>SAM-CapsNet (proposed)</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td></tr>
-        <tr><td class="name">no_sam</td><td>Pure CapsNet</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
-        <tr><td class="name">ch_only</td><td>Channel only</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
-        <tr><td class="name">tm_only</td><td>Temporal only</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
-        <tr><td class="name">sp_only</td><td>Spatial only</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
-        <tr><td class="name">ch_tm</td><td>Channel + Temporal</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
-        <tr><td class="name">tm_sp</td><td>Temporal + Spatial</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
-        <tr><td class="name">ch_sp</td><td>Channel + Spatial</td><td class="num">&check;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr class="total"><td class="name">full_sam</td><td>SAM-CapsNet (proposed)</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num">&check;</td></tr>
+        <tr><td class="name">no_sam</td><td>Sabour-style capsule baseline (different encoder, no normalisation)</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">ch_only</td><td>Channel only</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">tm_only</td><td>Temporal only</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">sp_only</td><td>Spatial only</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">ch_tm</td><td>Channel + Temporal</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">tm_sp</td><td>Temporal + Spatial</td><td class="num dim">&mdash;</td><td class="num">&check;</td><td class="num">&check;</td><td class="num dim">&mdash;</td></tr>
+        <tr><td class="name">ch_sp</td><td>Channel + Spatial</td><td class="num">&check;</td><td class="num">&check;</td><td class="num dim">&mdash;</td><td class="num dim">&mdash;</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="scroller">
     <table>
-      <caption>Non-capsule baselines, sharing the same protocol</caption>
-      <thead><tr><th>Model</th><th>Definition</th><th>Cell</th></tr></thead>
+      <caption>Other models</caption>
+      <thead><tr><th>Model</th><th>Definition</th><th>Section</th></tr></thead>
       <tbody>
-        <tr><td class="name">BaselineCNN</td><td>Identical convolutional stem, no attention, no capsules. Temporal-mean-pooled features into a linear softmax classifier.</td><td class="num">4B</td></tr>
-        <tr><td class="name">CNNSAMNoCapsule</td><td>Stem plus the Multi-Scale SAM block, linear classifier. Isolates the capsule stage.</td><td class="num">4B</td></tr>
-        <tr><td class="name">ResNet18Baseline</td><td>Frame-wise ResNet-18 at random initialisation, matching the no-pretrained-backbone protocol, mean-pooled logits.</td><td class="num">8B</td></tr>
-        <tr><td class="name">MobileNetV2</td><td>Same frame-wise arrangement as above.</td><td class="num">8B</td></tr>
+        <tr><td class="name">Attention removed</td><td>Identical encoder, normalisation and capsule layers to SAM-CapsNet, with the attention module switched off. The matched comparison for the effect of attention.</td><td class="num">20</td></tr>
+        <tr><td class="name">Placement variants</td><td>The same attention module before capsule formation, after capsule formation, or inside the routing loop.</td><td class="num">18</td></tr>
+        <tr><td class="name">Pre-trained stem</td><td>SAM-CapsNet with its encoder replaced by an ImageNet-pretrained ResNet-18 stem; capsule layers unchanged.</td><td class="num">21, 27</td></tr>
+        <tr><td class="name">BaselineCNN</td><td>Comparable convolutional encoder with a pooled softmax classifier, with or without channel and spatial attention. Single seed, separate routine.</td><td class="num">4B, 10</td></tr>
+        <tr><td class="name">ResNet-18, MobileNetV2</td><td>ImageNet-pretrained, frame features mean-pooled over time, trained on UCF-101 at learning rate 1e-3 and at a fine-tuning rate of 1e-4.</td><td class="num">25, 26</td></tr>
       </tbody>
     </table>
   </div>
@@ -473,53 +473,50 @@
 
 <section>
   <div class="sec-head">
-    <h2>Which cell produces which result</h2>
+    <h2>Which section produces which result</h2>
     <span class="backs">provenance map</span>
   </div>
   <p class="lede measure">
-    Every table and figure in the manuscript traces to a numbered cell. Results are written to
-    <code>SAVE_DIR</code> as JSON after each configuration, so an interrupted run resumes and
-    replots through Cell 12 without retraining.
+    Every table and figure in the manuscript traces to a numbered section of the notebook. The
+    same map is in the notebook's first cell. Results are written to <code>results_final/</code>
+    as JSON and PNG files.
   </p>
 
   <div class="scroller">
     <table>
-      <caption>Artifact to cell map</caption>
-      <thead><tr><th>Artifact</th><th>Produced by</th><th>Assembled in</th></tr></thead>
+      <caption>Paper item to notebook section</caption>
+      <thead><tr><th>Paper item</th><th>Section</th></tr></thead>
       <tbody>
-        <tr><td>Table 1, full comparison</td><td class="name">Cell 10, Cell 10B</td><td class="name">Cell 10C</td></tr>
-        <tr><td>Table 2, per-class accuracy</td><td class="name">Cell 10</td><td class="name">Cell 11</td></tr>
-        <tr><td>Table 3, cross-model with parameter counts</td><td class="name">Cell 8B, 9B, 10</td><td class="name">Cell 10D</td></tr>
-        <tr><td>Parameter counts</td><td class="name">Cell 8C</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Frame-count grid search over T</td><td class="name">Cell 8D</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Inference latency, forward pass only</td><td class="name">Cell 9C</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Sec. II-E capsule magnitude and activation attenuation</td><td class="name">Cell 14</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Fig. 2, coupling-coefficient clustering</td><td class="name">Cell 15</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Fig. 3, four-panel interpretability</td><td class="name">Cell 16</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Fig. 4, inter-class capsule vector distributions</td><td class="name">Cell 17</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Fig. 5, confusion-matrix comparison</td><td class="name">Cell 18</td><td class="dim">&mdash;</td></tr>
-        <tr><td>Subject-independent leave-groups-out split</td><td class="name">Cell 10A</td><td class="dim">&mdash;</td></tr>
+        <tr><td>Supplementary Table S3 (class counts); split file lists</td><td class="name">8</td></tr>
+        <tr><td>Table 1, CNN rows</td><td class="name">10</td></tr>
+        <tr><td>Sabour-style baseline under cross-entropy (Sec. II-E)</td><td class="name">11</td></tr>
+        <tr><td>Figure 5, confusion matrices</td><td class="name">12</td></tr>
+        <tr><td>Figure 2, activity-capsule lengths and angles</td><td class="name">13</td></tr>
+        <tr><td>Figure 3 and Supplementary Figure S1, interpretability</td><td class="name">14</td></tr>
+        <tr><td>Figure 4, per-class capsule-vector distributions</td><td class="name">15</td></tr>
+        <tr><td>Table 5, capsule orientation test</td><td class="name">16</td></tr>
+        <tr><td>Inference latency (Sec. III-F)</td><td class="name">17</td></tr>
+        <tr><td>Attention-placement study (Sec. III-A)</td><td class="name">18</td></tr>
+        <tr><td>Table 1, capsule rows; Table 4, routing concentration</td><td class="name">19</td></tr>
+        <tr><td>Table 1 and Table 4, network with attention removed</td><td class="name">20</td></tr>
+        <tr><td>Table 3, pre-trained ResNet-18 stem on UCF-11</td><td class="name">21</td></tr>
+        <tr><td>Supplementary Table S2</td><td class="name">22</td></tr>
+        <tr><td>Significance tests (Sec. III-A); Table 2, per-class accuracy</td><td class="name">23</td></tr>
+        <tr><td>Table 3, ResNet-18 and MobileNetV2 on UCF-101</td><td class="name">25 (lr 1e-3), 26 (lr 1e-4)</td></tr>
+        <tr><td>Table 3 and Sec. III-F, capsule models on UCF-101</td><td class="name">27, 27B</td></tr>
       </tbody>
     </table>
   </div>
-
-  <p class="src">
-    The interpretability cells read intermediate capsule tensors through the model's
-    <code>return_routing=True</code> forward path, which exposes the primary capsules, the
-    prediction vectors <code>u_hat</code>, the final coupling coefficients <code>c</code> and the
-    pre-squash sums <code>s</code>. Cell 13 uses <code>return_attention=True</code> for the
-    spatial attention overlays.
-  </p>
 </section>
 
 <section>
   <div class="sec-head">
     <h2>Training protocol</h2>
-    <span class="backs">Cell 6, Sec. II-F</span>
+    <span class="backs">Section 7, Sec. II-F</span>
   </div>
   <p class="lede measure">
-    Fixed across every configuration and both datasets. No early stopping, no per-configuration
-    tuning. The checkpoint with the best validation accuracy is the one evaluated on test.
+    Fixed across the capsule configurations and both datasets. The checkpoint with the best
+    validation accuracy is the one evaluated on the test set.
   </p>
 
   <div class="scroller">
@@ -527,51 +524,61 @@
       <caption>Run configuration</caption>
       <thead><tr><th>Setting</th><th class="num">Value</th></tr></thead>
       <tbody>
-        <tr><td>Frames per clip</td><td class="num">16 @ 5 fps, fixed rate</td></tr>
         <tr><td>Epochs</td><td class="num">15</td></tr>
-        <tr><td>Batch size</td><td class="num">2</td></tr>
-        <tr><td>Gradient accumulation</td><td class="num">4 (effective batch 8)</td></tr>
         <tr><td>Optimiser</td><td class="num">Adam</td></tr>
-        <tr><td>Learning rate</td><td class="num">5e-4</td></tr>
+        <tr><td>Learning rate</td><td class="num">1e-3</td></tr>
         <tr><td>Weight decay</td><td class="num">1e-4</td></tr>
-        <tr><td>Schedule</td><td class="num">step decay 0.5 every 7 epochs</td></tr>
+        <tr><td>Schedule</td><td class="num">3-epoch linear warm-up, then cosine decay</td></tr>
         <tr><td>Gradient clipping</td><td class="num">5.0</td></tr>
-        <tr><td>Precision</td><td class="num">mixed (AMP on CUDA)</td></tr>
         <tr><td>Routing iterations</td><td class="num">3</td></tr>
+        <tr><td>Data augmentation</td><td class="num">none</td></tr>
         <tr class="total"><td>Seeds</td><td class="num">42, 123, 456, 789, 2024</td></tr>
       </tbody>
     </table>
   </div>
 
+  <div class="scroller">
+    <table>
+      <caption>Two training routines, as stated in Sec. II-F</caption>
+      <thead><tr><th>Routine</th><th>Objective</th><th>Used for</th><th>Sections</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Margin loss</td><td>Margin loss of Sabour et al. (2017) on the capsule lengths.</td><td>Tables 1, 2 and 4 and the capsule rows of Table 3.</td><td class="num">19 to 23, 27</td></tr>
+        <tr><td class="name">Cross-entropy</td><td>Cross-entropy on the capsule lengths, with mixed precision.</td><td>Placement study, SAM-CapsNet confusion matrix, orientation test and the single-clip figures.</td><td class="num">9, 11, 16, 18</td></tr>
+      </tbody>
+    </table>
+  </div>
+
   <p class="src">
-    Seeding covers Python, NumPy and Torch, and sets cuDNN to deterministic mode with
-    benchmarking disabled. Splits are stratified and regenerated per seed, so each seed varies the
-    data partition as well as the initialisation.
+    A seed fixes the data split and all random number generators. Capsule transformation weights
+    are initialised from N(0, 0.01&sup2;); on UCF-101 the weights of the Sabour-style baseline are
+    scaled by K/11 at initialisation (Section 27). The <code>BaselineCNN</code> rows of Table 1
+    use a separate softmax routine at learning rate 5e-4, a single seed and a split that is not
+    stratified.
   </p>
 </section>
 
 <section>
   <h2>Reproducing the results</h2>
   <p class="lede measure">
-    Requires a CUDA GPU with at least 8&nbsp;GB, PyTorch, and a local copy of UCF-101. The first
-    pass over the data decodes video and is slow; later passes load from the on-disk frame cache.
+    Requires a CUDA GPU, PyTorch with torchvision, and local copies of UCF-11 and UCF-101. The
+    first pass over the data decodes video and is slow; later passes load from the on-disk frame
+    caches.
   </p>
   <ul class="measure">
-    <li>Run Cells 1 to 6B to define the dataset, model, ablation registry and training utilities.</li>
-    <li>Set <code>DATASET_PATH</code> in Cell 7A. Cell 8A is a path diagnostic that reports what it
-        can and cannot find before you commit to a long run.</li>
-    <li>Run Cell 8 to build the frame cache, then Cell 9 as a single-seed smoke test.</li>
-    <li>Run Cell 10, then Cell 10B, then Cell 10C for Table 1.</li>
-    <li>For the 101-class row, switch to Cell 7B, re-run Cell 8 with <code>CLASS_SUBSET = None</code>,
-        then run Cell 9B.</li>
+    <li>Set <code>DATASET_PATH</code> (UCF-11) and <code>UCF101_PATH</code> (UCF-101) in Section 7.
+        Each dataset root holds one folder per class.</li>
+    <li>For a fast check, set <code>QUICK_TEST = True</code> and run all cells. Every section then
+        uses one seed and two epochs; the numbers are not meaningful.</li>
+    <li>Set <code>QUICK_TEST = False</code> and run all cells for the full run. Results, figures
+        and split lists are written to <code>results_final/</code>.</li>
+    <li>The UCF-101 sections (24 to 27) come last and take the longest. Set
+        <code>RUN_UCF101 = False</code> to stop before them.</li>
   </ul>
   <p class="src">
     UCF-101 is distributed by its original authors at
     <a href="https://www.crcv.ucf.edu/data/UCF101.php">crcv.ucf.edu/data/UCF101.php</a>, and the
     UCF-11 YouTube Action set at
     <a href="https://www.crcv.ucf.edu/data/UCF_YouTube_Action.php">crcv.ucf.edu/data/UCF_YouTube_Action.php</a>.
-    The subject-independent splitter in Cell 10A reads group identifiers from either the filename
-    or the parent folder, so it works with either distribution layout.
   </p>
 </section>
 
@@ -580,17 +587,16 @@
   <ul class="measure">
     <li><strong>Accuracy values, run logs and checkpoints.</strong> Withheld while the manuscript
         is under review. They will be added to this record on acceptance.</li>
-    <li><strong>The dataset.</strong> Redistributed by its original authors at the links above.</li>
-    <li><strong>Trained weights.</strong> Every reported number comes from a run of this notebook
-        at one of the five fixed seeds, so the notebook together with the seed list is the
-        reproducible artifact.</li>
+    <li><strong>The datasets.</strong> Distributed by their original authors at the links above.</li>
+    <li><strong>Trained weights.</strong> The notebook together with the seed list and the split
+        file lists is the reproducible artifact.</li>
   </ul>
 </section>
 
 <footer>
   <p>Prepared as a replication appendix for peer review. No accuracy values are published while
-  the manuscript is under review; everything documented on this page is a direct description of
-  the code in the accompanying notebook.</p>
+  the manuscript is under review; everything documented on this page is a description of the code
+  in the accompanying notebook.</p>
 </footer>
 
 </div>
